@@ -44,6 +44,20 @@
     transition: all 0.4s ease-in-out;
     }
 
+#layer3 {
+    text-align: center;
+    position: absolute;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    opacity: 1;
+    //background-color: rgba(51,51,51, 0.7);
+    z-index: 9999;
+    transition: all 0.4s ease-in-out;
+    }
+
+
+
 </style>
 
 <div class="row">
@@ -144,6 +158,41 @@ function spinnerStop() {
     $("#throbber").hide();
     console.log("Spinner stopped!");
 }
+
+// Crosshair for the molecules
+function initializeCrosshair(posX, posY, size){
+	var crosshairpaper = Raphael(posX, posY, size, size);
+	var set = crosshairpaper.set();
+	
+	$('svg').attr("cursor","crosshair");
+	
+	halfSize = size/2;
+	
+	set.push(
+	    crosshairpaper.path("M0 "+halfSize+"H"+size).attr("stroke","cyan"),
+	    crosshairpaper.path("M"+halfSize+" 0V"+size).attr("stroke","cyan")
+	);
+	
+	 $('svg').mousemove(function(e){   
+	      set.remove()
+	
+	      var LineXPos = (e.pageX-posX);
+	      var LineYPos = (e.pageY-posY);
+	      
+	      set.push(
+	      crosshairpaper.path("M0 "+LineYPos+"H"+size).attr("stroke","cyan"),
+	      crosshairpaper.path("M"+LineXPos+" 0V"+size).attr("stroke","cyan")
+	      );
+	      
+	    });
+	
+	 $('svg').click(function(e){
+	   	alert((e.clientX-posX)+","+(e.clientY-posY));
+	   	$('svg').unbind('mousemove');
+	  });
+}
+
+
 // Function to load the TaskRun data into the HTML skeleton
 function loadData( data ) {
     // Uncomment next line for debugging purposes
@@ -193,6 +242,9 @@ function loadTask( task_id ) {
                 // Sets the stroke attribute of the rect
                 rect.attr("stroke", "cyan");
             }
+
+            // load the CrossHair
+            initializeCrosshair($("#layer3").offset().left,$("#layer3").offset().top,512);
         }
         else {
             $(".skeleton").hide();
