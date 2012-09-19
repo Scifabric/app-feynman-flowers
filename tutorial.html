@@ -110,7 +110,7 @@
             and a blue cross hair will appear:</p>
             <img class="tutorial" src="http://imageshack.us/a/img222/3859/fg2o.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
             <p>The coordinates will be updated as you move the mouse. Click to mark the final position and the cross hair will stop moving.</p>
-            <p><span class="label label-info"><i class="icon-bull-horn"></i></span> You can update the coordinates of the center of the molecule by clicking again in the image.</p>
+            <p><span class="label label-info"><i class="icon-bullhorn"></i> Tip</span> You can update the coordinates of the center of the molecule by clicking again in the image.</p>
         </div>
         <div id="3" style="display:none;">
             <p>Once you have marked the center of the molecule, you will have to rotate it to match the four axes of the molecule:</p>
@@ -283,7 +283,7 @@ function increaseDegrees() {
     $("#rotation").text(degrees + "º");
     set.transform("r" + degrees + ","+mol_x+","+mol_y);
 
-    if (n_clicks_rot < 1) {
+    if (n_clicks_rot < 2) {
         n_clicks_rot++;
         $("#rotation-btn").popover("destroy");
         $("#rotation-btn").popover({

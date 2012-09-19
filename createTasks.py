@@ -88,8 +88,11 @@ def create_app(api_url, api_key, name=None, short_name=None,
     file = open('long_description.html')
     long_description = file.read()
     file.close()
+    file = open("tutorial.html")
+    text_tutorial = file.read()
+    file.close()
     info = dict(thumbnail="http://imageshack.us/a/img560/7351/feynmanthumbnail.png",
-                 task_presenter=text)
+                 task_presenter=text, tutorial=text_tutorial)
     data = dict(name=name, short_name=short_name, description=description,
                 long_description=long_description,
                 hidden=0, info=info)
@@ -200,7 +203,11 @@ def update_template(api_url, api_key, app='feynmanflowers'):
         file = open('long_description.html')
         long_desc = file.read()
         file.close()
-        info = dict(thumbnail=res['info']['thumbnail'], task_presenter=text)
+        # Re-read the tutorial
+        file = open('tutorial.html')
+        tutorial = file.read()
+        info = dict(thumbnail=res['info']['thumbnail'], task_presenter=text,
+                tutorial=tutorial)
         data = dict(id=res['id'], name=res['name'],
                     short_name=res['short_name'],
                     description=res['description'], hidden=res['hidden'],
