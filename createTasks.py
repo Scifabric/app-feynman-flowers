@@ -76,9 +76,9 @@ def create_app(api_url, api_key, name=None, short_name=None,
     :rtype: integer
     """
     print('Creating app')
-    name = u'Flickr Person PHinder'  # Name with a typo
+    name = u"Feynman's Flowers"  # Name with a typo
     short_name = u'feynmanflowers'
-    description = u'Do you see a human in this photo?'
+    description = u'Help us with our nano garden!'
     # JSON Blob to present the tasks for this app to the users
     # First we read the template:
     file = open('template.html')
@@ -88,7 +88,7 @@ def create_app(api_url, api_key, name=None, short_name=None,
     file = open('long_description.html')
     long_description = file.read()
     file.close()
-    info = dict(thumbnail="http://imageshack.us/a/img99/7351/feynmanthumbnail.png",
+    info = dict(thumbnail="http://imageshack.us/a/img560/7351/feynmanthumbnail.png",
                  task_presenter=text)
     data = dict(name=name, short_name=short_name, description=description,
                 long_description=long_description,
@@ -118,7 +118,7 @@ def create_app(api_url, api_key, name=None, short_name=None,
         print("Ooooops! the name of the application has a typo!")
         print("Updating it!")
         if (update_app(api_url, api_key, output['id'],
-            "Flickr Person Finder")):
+            "Feynman's garden")):
             print "Application name fixed!"
             return output['id']
         else:
