@@ -199,6 +199,7 @@ function activateCrosshair() {
 // Crosshair for the molecules
 function initializeCrosshair(div,posX, posY, size){
     var pause = false;
+    var pauseAngle = false;
     crosshairpaper = Raphael(document.getElementById(div), size, size);
     set = crosshairpaper.set();
     
@@ -215,7 +216,7 @@ function initializeCrosshair(div,posX, posY, size){
         crosshairpaper.path("M"+halfSize+" 0V"+size).attr("stroke","cyan")
     );
     
-     $('svg').mousemove(function(e){   
+     $('svg').mousemove(function(e){  
          if (!pause) {
           set.remove()
     
@@ -230,7 +231,23 @@ function initializeCrosshair(div,posX, posY, size){
           mol_y = e.pageY-posY;
           $("#molecule-x").text(mol_x);
           $("#molecule-y").text(mol_y);
-        }
+          set.transform("r"+degrees+" "+mol_x+" "+mol_y);
+        } else {
+        
+	        if(!pauseAngle){
+		        X = parseInt($("#molecule-x").text());
+		        Y = parseInt($("#molecule-y").text());
+		        
+		        degrees  = Raphael.angle((e.pageX-posX), (e.pageY-posY),X,Y);
+			    set.transform("r"+degrees+" "+X+" "+Y);
+			    $('svg').attr("cursor","move");	
+			    $("#rotation").text(parseInt(degrees,10)+"°");
+		    }else{
+			   $('svg').attr("cursor","default");	 
+		    }
+		 }	
+
+        
 
           
         });
@@ -238,11 +255,20 @@ function initializeCrosshair(div,posX, posY, size){
      $('svg').click(function(e){
         $("#molecule-x").text(e.pageX-posX);
         $("#molecule-y").text(e.pageY-posY);
+        
+        //Raphael.isPointInsideBBox(Raphael.getElementById(), e.pageX-posX, e.pageY-posY)
+        
         if (!pause) {
             pause = true;
         }
         else {
-            pause = false;
+        	if(!pauseAngle){
+	        	pauseAngle= true;
+        	}
+        	else{
+        		pauseAngle = false;
+        		pause = false;
+            }
         }
        
         $("#rotation-box").show();
