@@ -110,7 +110,7 @@
         <div class="span2">
           <div class="btn-group">
             <button class="btn" onclick="increaseDegrees()"><i class="icon icon-white icon-plus"></i></button>
-            <button id="rotation-btn" rel="tooltip" title="Use these buttons to increase/decrease the degrees" class="btn" onclick="decreaseDegrees()"><i class="icon icon-white icon-minus"></i></button>
+            <button id="rotation-btn" rel="tooltip" title="Use these buttons to adjust the degrees" class="btn" onclick="decreaseDegrees()"><i class="icon icon-white icon-minus"></i></button>
           </div>
         </div>
       </div>
@@ -234,18 +234,18 @@ function initializeCrosshair(div,posX, posY, size){
           set.transform("r"+degrees+" "+mol_x+" "+mol_y);
         } else {
         
-	        if(!pauseAngle){
-		        X = parseInt($("#molecule-x").text());
-		        Y = parseInt($("#molecule-y").text());
-		        
-		        degrees  = Raphael.angle((e.pageX-posX), (e.pageY-posY),X,Y);
-			    set.transform("r"+degrees+" "+X+" "+Y);
-			    $('svg').attr("cursor","move");	
-			    $("#rotation").text(parseInt(degrees,10)+"°");
-		    }else{
-			   $('svg').attr("cursor","default");	 
-		    }
-		 }	
+            if(!pauseAngle){
+                X = parseInt($("#molecule-x").text());
+                Y = parseInt($("#molecule-y").text());
+                
+                degrees  = Raphael.angle((e.pageX-posX), (e.pageY-posY),X,Y);
+                set.transform("r"+degrees+" "+X+" "+Y);
+                $('svg').attr("cursor","move"); 
+                $("#rotation").text(parseInt(degrees,10)+"°");
+            }else{
+               $('svg').attr("cursor","default");    
+            }
+         }  
 
         
 
@@ -262,12 +262,12 @@ function initializeCrosshair(div,posX, posY, size){
             pause = true;
         }
         else {
-        	if(!pauseAngle){
-	        	pauseAngle= true;
-        	}
-        	else{
-        		//pauseAngle = false; Forever true.
-        		pause = false;
+            if(!pauseAngle){
+                pauseAngle= true;
+            }
+            else{
+                //pauseAngle = false; Forever true.
+                pause = false;
             }
         }
        

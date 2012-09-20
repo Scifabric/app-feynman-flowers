@@ -102,21 +102,26 @@
         </div>
         <div id="1" style="display:none;">
             <p>The application will mark the target molecule with a blue rectangle like this:</p>
-            <img class="tutorial" src="http://imageshack.us/a/img211/1674/fg1e.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
+            <img class="tutorial" src="http://imageshack.us/a/img41/8239/fg4l.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
 
         </div>
         <div id="2" style="display:none;">
             <p>In order to mark the center of the molecule, hover your mouse over the molecule
             and a blue cross hair will appear:</p>
-            <img class="tutorial" src="http://imageshack.us/a/img222/3859/fg2o.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
+            <img class="tutorial" src="http://imageshack.us/a/img513/4876/fg5.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
             <p>The coordinates will be updated as you move the mouse. Click to mark the final position and the cross hair will stop moving.</p>
             <p><span class="label label-info"><i class="icon-bullhorn"></i> Tip</span> You can update the coordinates of the center of the molecule by clicking again in the image.</p>
         </div>
         <div id="3" style="display:none;">
-            <p>Once you have marked the center of the molecule, you will have to rotate it to match the four axes of the molecule:</p>
-            <img src="http://imageshack.us/a/img17/2563/fg3i.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
+            <p>Sometimes the molecules will be smaller, so it will be a bit more challenging. Check these two examples:</p>
+            <img class="tutorial" src="http://imageshack.us/a/img211/1674/fg1e.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
+            <img class="tutorial" src="http://imageshack.us/a/img41/8239/fg4l.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
         </div>
         <div id="4" style="display:none;">
+            <p>Once you have marked the center of the molecule, you will have to rotate it, just move the mouse, to match the four axes of the molecule:</p>
+            <img src="http://imageshack.us/a/img854/3325/fg6j.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
+        </div>
+        <div id="5" style="display:none;">
             <p>Now it's your turn to try!</p>
         </div>
     </div>
@@ -198,7 +203,7 @@ function show(method){
         tut = tut - 1;
     }
 
-    var max = 5;
+    var max = 6;
     var min = 0;
 
     if (tut < max) {
@@ -281,7 +286,7 @@ function increaseDegrees() {
     $("#rotation").text(degrees + "º");
     set.transform("r" + degrees + ","+mol_x+","+mol_y);
 
-    if (n_clicks_rot < 2) {
+    if (n_clicks_rot < 1) {
         n_clicks_rot++;
         $("#rotation-btn").popover("destroy");
         $("#rotation-btn").popover({
@@ -295,7 +300,17 @@ function increaseDegrees() {
     }
     else {
         $("#rotation-btn").popover("destroy");
-        $("#submit-btn").popover("show");
+        $("#photo").popover("destroy");
+        $("#photo").popover({
+            'title': "<strong>Adjusting the center of the molecule<strong>",
+            'content': "Sometimes after aligining the axes, you will need to re-adjust the center. If you need it, just click again in the image to start moving the crosshair again, and click a final time to mark the position.",
+            'placement': 'left',
+            'trigger': 'manual',
+        });
+
+        $("#photo").popover("show");
+
+        //$("#submit-btn").popover("show");
     }
 
 }
@@ -322,7 +337,17 @@ function decreaseDegrees() {
     }
     else {
         $("#rotation-btn").popover("destroy");
-        $("#submit-btn").popover("show");
+        $("#photo").popover("destroy");
+        $("#photo").popover({
+            'title': "<strong>Adjusting the center of the molecule<strong>",
+            'content': "Sometimes after aligining the axes, you will need to re-adjust the center. If you need it, just click again in the image to start moving the crosshair again, and click a final time to mark the position.",
+            'placement': 'left',
+            'trigger': 'manual',
+        });
+
+        $("#photo").popover("show");
+
+        //$("#submit-btn").popover("show");
     }
 
 }
@@ -335,6 +360,7 @@ function activateCrosshair() {
 function initializeCrosshair(div,posX, posY, size){
     var pause = false;
     var n_clicks = 0;
+    var pauseAngle = false;
     crosshairpaper = Raphael(document.getElementById(div), size, size);
     set = crosshairpaper.set();
     
@@ -366,43 +392,62 @@ function initializeCrosshair(div,posX, posY, size){
           mol_y = e.pageY-posY;
           $("#molecule-x").text(mol_x);
           $("#molecule-y").text(mol_y);
-        }
+          set.transform("r"+degrees+" "+mol_x+" "+mol_y);
+        } else {
+        
+            if(!pauseAngle){
+                X = parseInt($("#molecule-x").text());
+                Y = parseInt($("#molecule-y").text());
+                
+                degrees  = Raphael.angle((e.pageX-posX), (e.pageY-posY),X,Y);
+                set.transform("r"+degrees+" "+X+" "+Y);
+                $('svg').attr("cursor","move"); 
+                $("#rotation").text(parseInt(degrees,10)+"°");
+            }else{
+               $('svg').attr("cursor","default");    
+            }
+         }  
+
+        
 
           
         });
     
      $('svg').click(function(e){
+        if (!pause) {
+            pause = true;
+        }
+        else {
+            if(!pauseAngle){
+                pauseAngle= true;
+            }
+            else{
+                //pauseAngle = false; Forever true.
+                pause = false;
+            }
+        }
+
         n_clicks++;
+        console.log(n_clicks);
         $("#molecule-x").text(e.pageX-posX);
         $("#molecule-y").text(e.pageY-posY);
         $("#layer0").popover("hide");
         if (n_clicks == 1) {
             $("#photo").popover({
-                'title': "<strong>Fixing the position<strong>",
-                'content': "If you want to replace the cross hair, click again in the photo",
+                'title': "<strong>Aligning the crosshair with molecule axes<strong>",
+                'content': "After marking the center, you can move the mouse to align the blue crosshair with the molecule axes. Then, <strong>click</strong> again to pause the rotation.",
                 'placement': 'left',
                 'trigger': 'manual',
             });
 
             $("#photo").popover("show");
         }
+
         if (n_clicks == 2 ){
             $("#photo").popover("destroy");
-            $("#photo").popover({
-                'title': "<strong>Fixing the position<strong>",
-                'content': "Congratulations! You now know how to mark the center of the molecule. Click again on the image, so you can see how you can report the rotation of the axes.",
-                'placement': 'left',
-                'trigger': 'manual',
-            });
-
-            $("#photo").popover("show");
-        }
-
-        if (n_clicks == 3 ){
-            $("#photo").popover("destroy");
             $("#rotation-btn").popover({
-                'title': "<strong>Aligning the cross hair with the molecule axes<strong>",
-                'content': 'In order to align the cross hair with the axes of the molecule, press the <i class="icon-plus"></i> and <i class="icon-minus"></i> buttons.',
+                'title': "<strong>Tip<strong>",
+                'content': 'You can adjust the angle with the <i class="icon-plus"></i> and <i class="icon-minus"></i> buttons. Try it!',
                 'placement': 'right',
                 'trigger': 'manual',
             });
@@ -410,15 +455,24 @@ function initializeCrosshair(div,posX, posY, size){
             $("#rotation-btn").popover("show");
         }
 
+        //if (n_clicks == 3 ){
+        //    $("#photo").popover("destroy");
+        //    $("#photo").popover({
+        //        'title': "<strong>Adjusting the center of the molecule<strong>",
+        //        'content': "Sometimes after aligining the axes, you will need to re-adjust the center. If you need it, just click again in the image to start moving the crosshair again, and click a final time to mark the position.",
+        //        'placement': 'left',
+        //        'trigger': 'manual',
+        //    });
+
+        //    $("#photo").popover("show");
+        //}
+
+        if (n_clicks == 4) {
+            $("#photo").popover("destroy");
+            $("#submit-btn").popover("show");
+        }
 
 
-        if (!pause) {
-            pause = true;
-        }
-        else {
-            pause = false;
-        }
-       
         $("#rotation-box").show();
         $("#answer").show();
         $("#rotation-btn").tooltip({'trigger': 'manual', 'placement': 'right'}); 
