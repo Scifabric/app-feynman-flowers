@@ -98,10 +98,10 @@
         <div id="0">
             <p>Feynman's garden application will show you a photo from a molecule
             and we will need your help to find out the coordinates of the center of the molecule,
-            as well as the ange that its axes have.</p> 
+            as well as the angle that its axes have.</p> 
         </div>
         <div id="1" style="display:none;">
-            <p>The application will mark the target molecule with blue rectangle like this:</p>
+            <p>The application will mark the target molecule with a blue rectangle like this:</p>
             <img class="tutorial" src="http://imageshack.us/a/img211/1674/fg1e.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
 
         </div>
@@ -115,8 +115,6 @@
         <div id="3" style="display:none;">
             <p>Once you have marked the center of the molecule, you will have to rotate it to match the four axes of the molecule:</p>
             <img src="http://imageshack.us/a/img17/2563/fg3i.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
-           <p>These photos represent the bad cases that we want to avoid.</p>
-           <p>Always choose the photo with the biggest green area.</p>
         </div>
         <div id="4" style="display:none;">
             <p>Now it's your turn to try!</p>
@@ -222,7 +220,7 @@ function show(method){
         $("#welcome").modal("hide");
         $("#layer0").popover({
             'title': "<strong>Marking the center of the molecule<strong>",
-            'content': "Hover your mouse over the photo in order to place the marker in the center of the molecule and <strong>click</strong> to place mark the center.",
+            'content': "Hover your mouse over the photo in order to place the marker in the center of the molecule and <strong>click</strong> to mark the center.",
             'placement': 'left',
             'trigger': 'manual',
         });
