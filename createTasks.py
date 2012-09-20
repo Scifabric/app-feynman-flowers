@@ -121,7 +121,7 @@ def create_app(api_url, api_key, name=None, short_name=None,
         print("Ooooops! the name of the application has a typo!")
         print("Updating it!")
         if (update_app(api_url, api_key, output['id'],
-            "Feynman's garden")):
+            "Feynman's flowers")):
             print "Application name fixed!"
             return output['id']
         else:
