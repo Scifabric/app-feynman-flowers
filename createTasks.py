@@ -142,23 +142,27 @@ def create_task(api_url, api_key, app_id, n_answers, photo):
     # Each row has the following format
     # row[0] = Filename,
     # row[1] = Molecule Label,
-    # row[2] = Bounding Box X1,
-    # row[3] = Bounding Box Y1,
-    # row[4] = Bounding Box width,
-    # row[5] = Bounding Box height,
-    # row[6] = Bounding Box X2,
-    # row[7] = Bounding Box Y2,
+    # row[2] = Image width in nm,
+    # row[3] = Image heigh in nm,
+    # row[4] = Bounding Box X1,
+    # row[5] = Bounding Box Y1,
+    # row[6] = Bounding Box width,
+    # row[7] = Bounding Box height,
+    # row[8] = Bounding Box X2,
+    # row[9] = Bounding Box Y2,
 
     # Data for the tasks
     data_url = 'http://www.ucl.ac.uk/~ucanchi/PyBossa/Data/FePc_Cu001/'
-    width = row[4]
-    height = row[5]
+    width = row[6]
+    height = row[7]
     info = dict(question="How does it stick?",
                 n_answers=int(n_answers),
                 url_photo=data_url + row[0],
                 molecule_label=row[1],
-                bbox=[dict(x=row[2],y=row[3],width=width,height=height),
-                      dict(x=row[6],y=row[7],width=width,height=height),
+                #img_width=row[2],
+                #img_height=row[3],
+                bbox=[dict(x=row[4],y=row[5],width=width,height=height),
+                      dict(x=row[8],y=row[9],width=width,height=height),
                     ])
 
     data = dict(app_id=app_id, state=0, info=info,
@@ -248,7 +252,7 @@ def update_template(api_url, api_key, app='feynmanflowers'):
         return False
 
 
-def update_tasks(api_url, api_key, app='feynmanflowers'):
+def update_tasks(api_url, api_key, csvreader, app='feynmanflowers', ):
     """
     Update tasks question
 
@@ -256,6 +260,8 @@ def update_tasks(api_url, api_key, app='feynmanflowers'):
     :returns: True when the template has been updated.
     :rtype: boolean
     """
+
+    data_url = 'http://www.ucl.ac.uk/~ucanchi/PyBossa/Data/FePc_Cu001/'
     request = urllib2.Request('%s/api/app?short_name=%s' %
                               (api_url, app))
     request.add_header('Content-type', 'application/json')
@@ -265,27 +271,38 @@ def update_tasks(api_url, api_key, app='feynmanflowers'):
     app = res[0]
     if app.get('short_name'):
         request = urllib2.Request('%s/api/task?app_id=%s&limit=%s' %
-                                  (api_url, app['id'], 1))
+                                  (api_url, app['id'], 10000))
         request.add_header('Content-type', 'application/json')
 
         res = urllib2.urlopen(request).read()
         tasks = json.loads(res)
+        tmp = []
+        for row in csvreader:
+            tmp.append(row)
 
+        print "Number of tasks: %s" % len(tasks)
         for t in tasks:
-            t['info']['question'] = u'Do you see a human in this photo?'
-            data = dict(info=t['info'], app_id=t['app_id'])
-            data = json.dumps(data)
-            request = urllib2.Request(api_url + '/api/task/' + str(t['id']) + \
-                                      '?api_key=' + api_key)
-            request.add_data(data)
-            request.add_header('Content-type', 'application/json')
-            request.get_method = lambda: 'PUT'
+            #t['info']['question'] = u'Do you see a human in this photo?'
+            print "Updating Task ID: %s " % t['id']
 
-            if (urllib2.urlopen(request).getcode() == 200):
-                print "Task ID: %s  updated" % t['id']
-            else:
-                return False
+            for row in tmp:
+                if ( ( ( data_url + row[0] ) == t['info']['url_photo'] ) and \
+                    ( row[1] == t['info']['molecule_label']) ):
+                        t['info']['img_width'] = row[2]
+                        t['info']['img_height'] = row[3]
+                        data = dict(info=t['info'], app_id=t['app_id'])
+                        data = json.dumps(data)
+                        request = urllib2.Request(api_url + '/api/task/' + str(t['id']) + \
+                                                  '?api_key=' + api_key)
+                        request.add_data(data)
+                        request.add_header('Content-type', 'application/json')
+                        request.get_method = lambda: 'PUT'
 
+                        if (urllib2.urlopen(request).getcode() == 200):
+                            print "Task ID: %s  updated" % t['id']
+                            break
+                        else:
+                            break
     else:
         return False
 
@@ -394,6 +411,8 @@ if __name__ == "__main__":
             # Each row has the following format
             # Filename,
             # Molecule Label,
+            # Image width nm,
+            # Image heigh nm,
             # Bounding Box X1,
             # Bounding Box Y1,
             # Bounding Box width,
@@ -432,7 +451,10 @@ if __name__ == "__main__":
 
     if options.update_tasks:
         print "Updating task question"
-        update_tasks(options.api_url, options.api_key)
+        import csv 
+        with open('BoundingBoxData.csv', 'rb') as csvfile:
+            csvreader = csv.reader(csvfile, delimiter=',')
+            update_tasks(options.api_url, options.api_key, csvreader)
 
     if not options.create_app and not options.update_template\
             and not options.add_more_tasks:

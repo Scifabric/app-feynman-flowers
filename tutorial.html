@@ -236,8 +236,9 @@ function show(method){
             'trigger': 'manual',
         });
 
+        var diameter = Math.floor((218*90)/100);
         $("#layer0").popover("show");
-        initializeCrosshair("layer3", $("#layer3").offset().left,$("#layer3").offset().top,512);
+        initializeCrosshair("layer3", $("#layer3").offset().left,$("#layer3").offset().top,512,diameter);
         $("#mask" + pop).hover( function(){
             // Action when entering
             $("#pop" + pop).popover("hide");
@@ -357,7 +358,7 @@ function activateCrosshair() {
 }
 
 // Crosshair for the molecules
-function initializeCrosshair(div,posX, posY, size){
+function initializeCrosshair(div,posX, posY, size, diameter){
     var pause = false;
     var n_clicks = 0;
     var pauseAngle = false;
@@ -368,13 +369,18 @@ function initializeCrosshair(div,posX, posY, size){
     
     halfSize = size/2;
 
-    size = size * 100;
+    var radius = diameter/2;
+    //var x = halfSize;
+    //var y = halfSize;
+    var x = size/2;
+    var y= size/2;
+    var diameter = radius + halfSize;
 
-    halfSize = size/2;
     
     set.push(
-        crosshairpaper.path("M0 "+halfSize+"H"+size).attr("stroke","cyan"),
-        crosshairpaper.path("M"+halfSize+" 0V"+size).attr("stroke","cyan")
+        crosshairpaper.path("M"+( x-radius)+" "+( y )+"L"+( x+radius) + " " + y).attr("stroke","cyan"),
+        crosshairpaper.path("M"+( x )+" "+( y -radius)+"L"+(y) + " " + ( y+radius )).attr("stroke","cyan"),
+        crosshairpaper.circle(x,y,radius).attr("stroke","cyan")
     );
     
      $('svg').mousemove(function(e){   
@@ -385,8 +391,13 @@ function initializeCrosshair(div,posX, posY, size){
           var LineYPos = (e.pageY-posY);
           
           set.push(
-          crosshairpaper.path("M0 "+LineYPos+"H"+size).attr("stroke","cyan"),
-          crosshairpaper.path("M"+LineXPos+" 0V"+size).attr("stroke","cyan")
+          //crosshairpaper.path("M0 "+LineYPos+"H"+size).attr("stroke","cyan"),
+          //crosshairpaper.path("M"+LineXPos+" 0V"+size).attr("stroke","cyan")
+          crosshairpaper.path("M"+( LineXPos-radius)+" "+( LineYPos )+"L"+(LineXPos+radius) + " " + LineYPos).attr("stroke","cyan"),
+          crosshairpaper.path("M"+( LineXPos )+" "+( LineYPos-radius)+"L"+(LineXPos) + " " + ( LineYPos+radius )).attr("stroke","cyan"),
+
+          crosshairpaper.circle(LineXPos,LineYPos,radius).attr("stroke","cyan")
+
           );
           mol_x = e.pageX-posX;
           mol_y = e.pageY-posY;
@@ -582,6 +593,7 @@ function loadTask(  ) {
 
             posX = $("#layer3").offset().left;
             posY = $("#layer3").offset().top;
+
         }
         else {
             $(".skeleton").hide();

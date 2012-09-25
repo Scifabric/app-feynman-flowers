@@ -101,6 +101,9 @@
           <div id="progress" rel="tooltip" title="#" class="bar" style="width: 0%;"></div>
       </div>
       <p><span class="label label-warning"><i class="icon-bullhorn"></i> Tip</span> If you need help, check the <a class="btn btn-primary" href="../tutorial">Tutorial</a></p>
+      <p id="img_size_p">Image size: 
+        <span id="img_size" class="label label-inverse">Size: </span>
+      </p>
       <p>Molecule <strong>X</strong> and <strong>Y</strong> coordinates: <span id="molecule-x" class="label label-info">0</span> <span id="molecule-y" class="label label-info">0</span></p>
       <div id="rotation-box" class="row" style="display:none">
         <hr>
@@ -197,7 +200,7 @@ function activateCrosshair() {
 }
 
 // Crosshair for the molecules
-function initializeCrosshair(div,posX, posY, size){
+function initializeCrosshair(div,posX, posY, size, diameter){
     var pause = false;
     var pauseAngle = false;
     crosshairpaper = Raphael(document.getElementById(div), size, size);
@@ -205,30 +208,39 @@ function initializeCrosshair(div,posX, posY, size){
     
     $('svg').attr("cursor","crosshair");
     
-    halfSize = size/2;
+    halfSize = diameter/2;
+    var radius = diameter/2;
+    //var x = halfSize;
+    //var y = halfSize;
+    var x = size/2;
+    var y= size/2;
+    var diameter = radius + halfSize;
 
-    size = size * 100;
-
-    halfSize = size/2;
-    
     set.push(
-        crosshairpaper.path("M0 "+halfSize+"H"+size).attr("stroke","cyan"),
-        crosshairpaper.path("M"+halfSize+" 0V"+size).attr("stroke","cyan")
+        //crosshairpaper.path("M"+( x-radius )+" "+( y )+"H"+(diameter)).attr("stroke","cyan"),
+        //crosshairpaper.path("M"+( x )+" "+( y-radius )+"V"+(diameter)).attr("stroke","cyan"),
+        //crosshairpaper.circle(x,y,radius).attr("stroke","cyan")
+        crosshairpaper.path("M"+( x-radius)+" "+( y )+"L"+( x+radius) + " " + y).attr("stroke","cyan"),
+        crosshairpaper.path("M"+( x )+" "+( y -radius)+"L"+(y) + " " + ( y+radius )).attr("stroke","cyan"),
+        crosshairpaper.circle(x,y,radius).attr("stroke","cyan")
+
     );
     
      $('svg').mousemove(function(e){  
          if (!pause) {
           set.remove()
     
-          var LineXPos = (e.pageX-posX);
-          var LineYPos = (e.pageY-posY);
+          var LineXPos = Math.floor(e.pageX-posX);
+          var LineYPos = Math.floor(e.pageY-posY);
           
           set.push(
-          crosshairpaper.path("M0 "+LineYPos+"H"+size).attr("stroke","cyan"),
-          crosshairpaper.path("M"+LineXPos+" 0V"+size).attr("stroke","cyan")
+          crosshairpaper.path("M"+( LineXPos-radius)+" "+( LineYPos )+"L"+(LineXPos+radius) + " " + LineYPos).attr("stroke","cyan"),
+          crosshairpaper.path("M"+( LineXPos )+" "+( LineYPos-radius)+"L"+(LineXPos) + " " + ( LineYPos+radius )).attr("stroke","cyan"),
+
+          crosshairpaper.circle(LineXPos,LineYPos,radius).attr("stroke","cyan")
           );
-          mol_x = e.pageX-posX;
-          mol_y = e.pageY-posY;
+          mol_x = Math.floor(e.pageX-posX);
+          mol_y = Math.floor(e.pageY-posY);
           $("#molecule-x").text(mol_x);
           $("#molecule-y").text(mol_y);
           set.transform("r"+degrees+" "+mol_x+" "+mol_y);
@@ -253,8 +265,8 @@ function initializeCrosshair(div,posX, posY, size){
         });
     
      $('svg').click(function(e){
-        $("#molecule-x").text(e.pageX-posX);
-        $("#molecule-y").text(e.pageY-posY);
+        $("#molecule-x").text(Math.floor(e.pageX-posX));
+        $("#molecule-y").text(Math.floor(e.pageY-posY));
         
         //Raphael.isPointInsideBBox(Raphael.getElementById(), e.pageX-posX, e.pageY-posY)
         
@@ -320,6 +332,14 @@ function loadTask( task_id ) {
             loadUserProgress();
             $("#question h2").text(task.info.question);
             $("#task-id").text(task.id);
+            if (task.info.img_height != null) {
+                $("#img_size").text(task.info.img_width + "x" + task.info.img_height + " nano meters");
+            }
+            else {
+                $("#img_size").hide();
+                $("#img_size_p").hide();
+            }
+
             $("#photo-link").attr("href", task.info.url_photo);
             $("#photo").attr("src", task.info.url_photo);
             photo = task.info.url_photo;
@@ -333,21 +353,15 @@ function loadTask( task_id ) {
                 var rect = bboxpaper.rect(task.info.bbox[i].x,task.info.bbox[i].y,task.info.bbox[i].width,task.info.bbox[i].height);
                 
                 // Sets the stroke attribute of the rect
-                rect.attr("stroke", "cyan");
+                rect.attr("stroke", "white");
             }
 
             // load the CrossHair
-            //initializeCrosshair($("#layer3").offset().left,$("#layer3").offset().top,512);
             posX = $("#layer3").offset().left;
             posY = $("#layer3").offset().top;
-            initializeCrosshair("layer3", $("#layer3").offset().left,$("#layer3").offset().top,512);
-            //$("#layer1").css('-webkit-transform','rotate(30deg)'); 
-            //$("#layer1").css('-webkit-transform-origin','50% 50%;');
-            //$("#layer2").css('-webkit-transform','rotate(30deg)'); 
-            //$("#layer2").css('-webkit-transform-origin','50% 50%;');
-            //$("#layer3").css('-webkit-transform','rotate(30deg)'); 
-            //$("#layer3").css('-webkit-transform-origin','50% 50%;');
-
+            // 10% smaller than bbox width
+            var diameter= Math.floor( (task.info.bbox[0].width*90)/100 );
+            initializeCrosshair("layer3", $("#layer3").offset().left,$("#layer3").offset().top,512,diameter);
         }
         else {
             $(".skeleton").hide();
