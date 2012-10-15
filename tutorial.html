@@ -1,25 +1,24 @@
 <! -- Fix for Bootstrap css with Google Maps https://github.com/twitter/bootstrap/issues/1552 -->
 <style type="text/css">
-    #throbber {
-        padding: 10px;
-        position:absolute;
-        left: 45%;
-        top:45%;
-        margin: -50px 0 0 -50px;
-        z-index: 10000;
-        width: 100px;
-        height: 100px;
-    }
+#throbber {
+    padding: 10px;
+    position:absolute;
+    left: 45%;
+    top:45%;
+    margin: -50px 0 0 -50px;
+    z-index: 10000;
+    width: 100px;
+    height: 100px;
+}
 
 #layer0 {
-        position: relative;
-    }
+    position: relative
+}
 
 #layer1 {
     z-index: 1;
-        border: 1px solid rgb(0, 0, 0.1);
-        box-shadow: 0 0 5px #888;
-
+    border: 1px solid rgb(0, 0, 0.1);
+    box-shadow: 0 0 5px #888;
 }
 
 #layer2 {
@@ -32,7 +31,7 @@
     //background-color: rgba(51,51,51, 0.7);
     z-index: 2;
     transition: all 0.4s ease-in-out;
-    }
+}
 
 #layer2 {
     text-align: center;
@@ -44,7 +43,7 @@
     //background-color: rgba(51,51,51, 0.7);
     z-index: 3;
     transition: all 0.4s ease-in-out;
-    }
+}
 
 #layer3 {
     text-align: center;
@@ -56,7 +55,7 @@
     //background-color: rgba(51,51,51, 0.7);
     z-index: 4;
     transition: all 0.4s ease-in-out;
-    }
+}
 </style>
 
 <div class="row">
@@ -310,8 +309,6 @@ function increaseDegrees() {
         });
 
         $("#photo").popover("show");
-
-        //$("#submit-btn").popover("show");
     }
 
 }
@@ -348,7 +345,6 @@ function decreaseDegrees() {
 
         $("#photo").popover("show");
 
-        //$("#submit-btn").popover("show");
     }
 
 }
@@ -370,8 +366,6 @@ function initializeCrosshair(div,posX, posY, size, diameter){
     halfSize = size/2;
 
     var radius = diameter/2;
-    //var x = halfSize;
-    //var y = halfSize;
     var x = size/2;
     var y= size/2;
     var diameter = radius + halfSize;
@@ -391,8 +385,6 @@ function initializeCrosshair(div,posX, posY, size, diameter){
           var LineYPos = (e.pageY-posY);
           
           set.push(
-          //crosshairpaper.path("M0 "+LineYPos+"H"+size).attr("stroke","cyan"),
-          //crosshairpaper.path("M"+LineXPos+" 0V"+size).attr("stroke","cyan")
           crosshairpaper.path("M"+( LineXPos-radius)+" "+( LineYPos )+"L"+(LineXPos+radius) + " " + LineYPos).attr("stroke","cyan"),
           crosshairpaper.path("M"+( LineXPos )+" "+( LineYPos-radius)+"L"+(LineXPos) + " " + ( LineYPos+radius )).attr("stroke","cyan"),
 
@@ -415,15 +407,15 @@ function initializeCrosshair(div,posX, posY, size, diameter){
                 $('svg').attr("cursor","move"); 
                 $("#rotation").text(parseInt(degrees,10)+"°");
             }else{
-               $('svg').attr("cursor","default");    
+               $('svg').attr("cursor","default");
             }
-         }  
+         }
 
-        
 
-          
+
+
         });
-    
+
      $('svg').click(function(e){
         if (!pause) {
             pause = true;
@@ -433,7 +425,6 @@ function initializeCrosshair(div,posX, posY, size, diameter){
                 pauseAngle= true;
             }
             else{
-                //pauseAngle = false; Forever true.
                 pause = false;
             }
         }
@@ -466,36 +457,20 @@ function initializeCrosshair(div,posX, posY, size, diameter){
             $("#rotation-btn").popover("show");
         }
 
-        //if (n_clicks == 3 ){
-        //    $("#photo").popover("destroy");
-        //    $("#photo").popover({
-        //        'title': "<strong>Adjusting the center of the molecule<strong>",
-        //        'content': "Sometimes after aligining the axes, you will need to re-adjust the center. If you need it, just click again in the image to start moving the crosshair again, and click a final time to mark the position.",
-        //        'placement': 'left',
-        //        'trigger': 'manual',
-        //    });
-
-        //    $("#photo").popover("show");
-        //}
-
         if (n_clicks == 4) {
             $("#photo").popover("destroy");
             $("#submit-btn").popover("show");
         }
 
-
         $("#rotation-box").show();
         $("#answer").show();
         $("#rotation-btn").tooltip({'trigger': 'manual', 'placement': 'right'}); 
-        //$("#rotation-btn").tooltip('show');
         $("#rotation-btn").bind('hover',function(){
             $("#rotation-btn").tooltip('hide');
         });
-
         degrees = parseInt($("#rotation").text(),10);
       });
 }
-
 
 // Function to load the TaskRun data into the HTML skeleton
 function loadData( data ) {

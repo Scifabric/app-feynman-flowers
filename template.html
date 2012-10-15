@@ -56,9 +56,6 @@
     z-index: 9999;
     transition: all 0.4s ease-in-out;
     }
-
-
-
 </style>
 
 <div class="row">
@@ -88,9 +85,10 @@
   </div> <!-- End Success and Error Messages for the user -->
 </div>
 
-
+<!-- Throbber to show the progress while loading images -->
 <div id="throbber"></div>
 
+<!-- UI for the task -->
 <div class="row skeleton">
   <div id="question" class="span5 well">
       <h2>Question</h2>
@@ -122,7 +120,6 @@
           <hr>
           <button class="btn btn-large btn-success" onclick="submitTask()"><i class="icon icon-white icon-ok"></i> Save the coordinates and the angle</button>
       </div>
-
   </div>
   <div id="layer0" class="span6">
       <div id="layer1" style="width:512px;height:512px;">
@@ -137,10 +134,18 @@
   </div>
 </div>
 
-<div class="row skeleton">
+<!-- Warning modal for users clicking outside the BBox-->
+<div class="modal" id="bboxWarning" style="display:none;z-index: 9999;">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3>Ooops!</h3>
+    </div>
+    <div class="modal-body">
+        <p>You should place the crosshair within the box like in the following image:</p>
+        <img class="tutorial" src="http://imageshack.us/a/img513/4876/fg5.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
+        <p>If you need help, check the <a href="../tutorial">Tutorial</a></p>
+    </div>
 </div>
-
-
 
 <script src="/static/js/raphael-min.js" type="text/javascript"></script>
 <script src="/static/js/pybossa/pybossa.js" type="text/javascript"></script>
@@ -154,6 +159,7 @@ var spinner = new Throbber({
 var degrees = 0;
 var photo;
 var molecule_label;
+var rect;
 // The spinner is attached to a div overlayed in top of the photo. 
 // This div is only shown when the spinner is active, 
 // otherwise, the div is hidden from the view to show the photo.¬
@@ -164,14 +170,12 @@ spinner.appendTo (document.getElementById('throbber'));
 function spinnerStart() {
     $("#throbber").show();
     spinner.start();
-    console.log("Spinner started!");
 }
 
 // This function stops the spinner and hides the spinner div¬
 function spinnerStop() {
     spinner.stop()
     $("#throbber").hide();
-    console.log("Spinner stopped!");
 }
 
 var crosshairpaper;
@@ -180,7 +184,6 @@ var mol_x=0;
 var mol_y=0;
 
 function increaseDegrees() {
-
     degrees = parseInt($("#rotation").text(),10);
     degrees += 1;
     $("#rotation").text(degrees + "º");
@@ -188,21 +191,17 @@ function increaseDegrees() {
 }
 
 function decreaseDegrees() {
-
     degrees = parseInt($("#rotation").text(),10);
     degrees -= 1;
     $("#rotation").text(degrees + "º");
     set.transform("r" + degrees + ","+mol_x+","+mol_y);
 }
 
-function activateCrosshair() {
-
-}
-
-// Crosshair for the molecules
+// Initialize the Crosshair for the molecules and set the events
 function initializeCrosshair(div,posX, posY, size, diameter){
     var pause = false;
     var pauseAngle = false;
+    // Create the SVG document
     crosshairpaper = Raphael(document.getElementById(div), size, size);
     set = crosshairpaper.set();
     
@@ -210,22 +209,18 @@ function initializeCrosshair(div,posX, posY, size, diameter){
     
     halfSize = diameter/2;
     var radius = diameter/2;
-    //var x = halfSize;
-    //var y = halfSize;
     var x = size/2;
     var y= size/2;
     var diameter = radius + halfSize;
 
     set.push(
-        //crosshairpaper.path("M"+( x-radius )+" "+( y )+"H"+(diameter)).attr("stroke","cyan"),
-        //crosshairpaper.path("M"+( x )+" "+( y-radius )+"V"+(diameter)).attr("stroke","cyan"),
-        //crosshairpaper.circle(x,y,radius).attr("stroke","cyan")
         crosshairpaper.path("M"+( x-radius)+" "+( y )+"L"+( x+radius) + " " + y).attr("stroke","cyan"),
         crosshairpaper.path("M"+( x )+" "+( y -radius)+"L"+(y) + " " + ( y+radius )).attr("stroke","cyan"),
         crosshairpaper.circle(x,y,radius).attr("stroke","cyan")
 
     );
     
+    // On mousemove update the position of the crosshair
      $('svg').mousemove(function(e){  
          if (!pause) {
           set.remove()
@@ -255,51 +250,49 @@ function initializeCrosshair(div,posX, posY, size, diameter){
                 $('svg').attr("cursor","move"); 
                 $("#rotation").text(parseInt(degrees,10)+"°");
             }else{
-               $('svg').attr("cursor","default");    
+               $('svg').attr("cursor","default");
             }
-         }  
-
-        
-
-          
+         }
         });
-    
+
+    // On Click, stop the position and allow the rotation of the crosshair
      $('svg').click(function(e){
         $("#molecule-x").text(Math.floor(e.pageX-posX));
         $("#molecule-y").text(Math.floor(e.pageY-posY));
         
-        //Raphael.isPointInsideBBox(Raphael.getElementById(), e.pageX-posX, e.pageY-posY)
-        
-        if (!pause) {
-            pause = true;
+        // Check if the user has placed the crosshair whithin the BBOX
+        if (!Raphael.isPointInsideBBox(rect.getBBox(), e.pageX-posX, e.pageY-posY) && (!pause)) {
+            $("#bboxWarning").modal('show');
         }
         else {
-            if(!pauseAngle){
-                pauseAngle= true;
+            if (!pause) {
+                pause = true;
             }
-            else{
-                //pauseAngle = false; Forever true.
-                pause = false;
+            else {
+                if(!pauseAngle){
+                    pauseAngle= true;
+                }
+                else{
+                    pause = false;
+                }
             }
-        }
-       
-        $("#rotation-box").show();
-        $("#answer").show();
-        $("#rotation-btn").tooltip({'trigger': 'manual', 'placement': 'right'}); 
-        $("#rotation-btn").tooltip('show');
-        $("#rotation-btn").bind('hover',function(){
-            $("#rotation-btn").tooltip('hide');
-        });
 
-        degrees = parseInt($("#rotation").text(),10);
+            $("#rotation-box").show();
+            $("#answer").show();
+            $("#rotation-btn").tooltip({'trigger': 'manual', 'placement': 'right'});
+            $("#rotation-btn").tooltip('show');
+            $("#rotation-btn").bind('hover',function(){
+                $("#rotation-btn").tooltip('hide');
+            });
+
+            degrees = parseInt($("#rotation").text(),10);
+        }
       });
 }
 
 
 // Function to load the TaskRun data into the HTML skeleton
 function loadData( data ) {
-    // Uncomment next line for debugging purposes
-    //console.log( data );
     if ( !$.isEmptyObject(data.task) ) {
         spinnerStart();
         console.log(data.task);
@@ -315,8 +308,6 @@ function loadData( data ) {
 }
 
 function loadTask( task_id ) {
-    // Uncomment next line for debugging purposes
-    //console.log( data );
     var t = $.ajax({
         url: '/api/task/'+task_id,
         dataType: 'json'
@@ -350,7 +341,7 @@ function loadTask( task_id ) {
             // This should be uncommented when we clear out the data format of bbox
             //for(i=0;i<task.info.bbox.length;i++) {
             for(i=0;i<1;i++) {
-                var rect = bboxpaper.rect(task.info.bbox[i].x,task.info.bbox[i].y,task.info.bbox[i].width,task.info.bbox[i].height);
+                rect = bboxpaper.rect(task.info.bbox[i].x,task.info.bbox[i].y,task.info.bbox[i].width,task.info.bbox[i].height);
                 
                 // Sets the stroke attribute of the rect
                 rect.attr("stroke", "white");
@@ -420,4 +411,18 @@ else {
         }
     });
 }
+</script>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-35399028-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
 </script>
