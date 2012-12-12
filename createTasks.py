@@ -22,122 +22,16 @@ import json
 import re
 import string
 from optparse import OptionParser
+import pbclient
 
 
-def delete_app(api_url, api_key, id):
+def task_formatter(app_config, row, n_answers):
     """
-    Deletes the Flickr Person Finder application.
-
-    :arg integer id: The ID of the application
-    :returns: True if the application has been deleted
-    :rtype: boolean
-    """
-    request = urllib2.Request(api_url + '/api/app/' + str(id) + \
-                              '?api_key=' + api_key)
-    request.get_method = lambda: 'DELETE'
-
-    if (urllib2.urlopen(request).getcode() == 204):
-        return True
-    else:
-        return False
-
-
-def update_app(api_url, api_key, id, name=None):
-    """
-    Updates the name of the Flickr PErson Finder application
-    :arg integer id: The ID of the application
-    :arg string name: The new name for the application
-    :returns: True if the application has been updated
-    :rtype: boolean
-    """
-    data = dict(id=id, name=name)
-    data = json.dumps(data)
-    request = urllib2.Request(api_url + '/api/app/' + str(id) + \
-                              '?api_key=' + api_key)
-    request.add_data(data)
-    request.add_header('Content-type', 'application/json')
-    request.get_method = lambda: 'PUT'
-
-    if (urllib2.urlopen(request).getcode() == 200):
-        return True
-    else:
-        return False
-
-
-def create_app(api_url, api_key, name=None, short_name=None,
-               description=None):
-    """
-    Creates the Flickr Person Finder application.
-    :arg string name: The application name.
-    :arg string short_name: The slug application name.
-    :arg string description: A short description of the application.
-
-    :returns: Application ID or 0 in case of error.
-    :rtype: integer
-    """
-    print('Creating app')
-    name = u"Feynman's Flowers"  # Name with a typo
-    short_name = u'feynmanflowers'
-    description = u'Help us with our nano garden!'
-    # JSON Blob to present the tasks for this app to the users
-    # First we read the template:
-    file = open('template.html')
-    text = file.read()
-    file.close()
-    # HTML Blob with a long description for the application
-    file = open('long_description.html')
-    long_description = file.read()
-    file.close()
-    file = open("tutorial.html")
-    text_tutorial = file.read()
-    file.close()
-    info = dict(thumbnail="http://imageshack.us/a/img560/7351/feynmanthumbnail.png",
-                 task_presenter=text, tutorial=text_tutorial)
-    data = dict(name=name, short_name=short_name, description=description,
-                long_description=long_description,
-                hidden=0, info=info)
-    data = json.dumps(data)
-
-    # Checking which apps have been already registered in the DB
-    apps = json.loads(urllib2.urlopen(api_url + '/api/app' + \
-                      '?api_key=' + api_key).read())
-    for app in apps:
-        if app['short_name'] == short_name:
-            print('{app_name} app is already registered in the DB'\
-                    .format(app_name=name))
-            print('Deleting it!')
-            if (delete_app(api_url, api_key, app['id'])):
-                print "Application deleted!"
-    print("The application is not registered in PyBOSSA. Creating it...")
-    # Setting the POST action
-    request = urllib2.Request(api_url + '/api/app?api_key=' + api_key)
-    request.add_data(data)
-    request.add_header('Content-type', 'application/json')
-
-    # Create the app in PyBOSSA
-    output = json.loads(urllib2.urlopen(request).read())
-    if (output['id'] != None):
-        print("Done!")
-        print("Ooooops! the name of the application has a typo!")
-        print("Updating it!")
-        if (update_app(api_url, api_key, output['id'],
-            "Feynman's flowers")):
-            print "Application name fixed!"
-            return output['id']
-        else:
-            print "An error has occurred"
-    else:
-        print("Error creating the application")
-        return 0
-
-
-def create_task(api_url, api_key, app_id, n_answers, photo):
-    """
-    Creates tasks for the application
+    Format a task 
 
     :arg integer app_id: Application ID in PyBossa.
-    :returns: Task ID in PyBossa.
-    :rtype: integer
+    :returns: PyBossa Task INFO object
+    :rtype: dict
     """
     # Each row has the following format
     # row[0] = Filename,
@@ -152,10 +46,11 @@ def create_task(api_url, api_key, app_id, n_answers, photo):
     # row[9] = Bounding Box Y2,
 
     # Data for the tasks
-    data_url = 'http://www.ucl.ac.uk/~ucanchi/PyBossa/Data/FePc_Cu001/'
+    #data_url = 'http://www.ucl.ac.uk/~ucanchi/PyBossa/Data/FePc_Cu001/'
+    data_url = 'http://www.ucl.ac.uk/~ucanchi/PyBossa/Data/DyPc2_Cu/'
     width = row[6]
     height = row[7]
-    info = dict(question="How does it stick?",
+    info = dict(question=app_config['question'],
                 n_answers=int(n_answers),
                 url_photo=data_url + row[0],
                 molecule_label=row[1],
@@ -164,194 +59,14 @@ def create_task(api_url, api_key, app_id, n_answers, photo):
                 bbox=[dict(x=row[4],y=row[5],width=width,height=height),
                       dict(x=row[8],y=row[9],width=width,height=height),
                     ])
-
-    data = dict(app_id=app_id, state=0, info=info,
-                 calibration=0, priority_0=0)
-
-    data = json.dumps(data)
-
-    # Setting the POST action
-    request = urllib2.Request(api_url + '/api/task' + '?api_key=' + api_key)
-    request.add_data(data)
-    request.add_header('Content-type', 'application/json')
-
-    # Create the task
-    output = json.loads(urllib2.urlopen(request).read())
-    if (output['id'] != None):
-        return True
-    else:
-        return False
-
-
-def update_template(api_url, api_key, app='feynmanflowers'):
-    """
-    Update tasks template and long description for the application 
-
-    :arg string app: Application short_name in PyBossa.
-    :returns: True when the template has been updated.
-    :rtype: boolean
-    """
-    request = urllib2.Request('%s/api/app?short_name=%s' %
-                              (api_url, app))
-    request.add_header('Content-type', 'application/json')
-
-    res = urllib2.urlopen(request).read()
-    res = json.loads(res)
-    res = res[0]
-    if res.get('short_name'):
-        # Re-read the template
-        file = open('template.html')
-        text = file.read()
-        file.close()
-        # Re-read the long_description
-        file = open('long_description.html')
-        long_desc = file.read()
-        file.close()
-        # Re-read the tutorial
-        file = open('tutorial.html')
-        tutorial = file.read()
-        info = dict(thumbnail=res['info']['thumbnail'], task_presenter=text,
-                tutorial=tutorial)
-        data = dict(id=res['id'], name=res['name'],
-                    short_name=res['short_name'],
-                    description=res['description'], hidden=res['hidden'],
-                    long_description=long_desc,
-                    info=info)
-        data = json.dumps(data)
-        request = urllib2.Request(api_url + '/api/app/' + str(res['id']) + \
-                                  '?api_key=' + api_key)
-        request.add_data(data)
-        request.add_header('Content-type', 'application/json')
-        request.get_method = lambda: 'PUT'
-
-        if (urllib2.urlopen(request).getcode() == 200):
-            return True
-        else:
-            return False
-
-    else:
-        return False
-
-    # Data for the tasks
-    info = dict(n_answers=2, link=photo['link'], url_m=photo['url_m'],
-                 url_b=photo['url_b'])
-    data = dict(app_id=app_id, state=0, info=info,
-                calibration=0, priority_0=0)
-    data = json.dumps(data)
-
-    # Setting the POST action
-    request = urllib2.Request(api_url + '/api/task' + '?api_key=' + api_key)
-    request.add_data(data)
-    request.add_header('Content-type', 'application/json')
-
-    # Create the task
-    output = json.loads(urllib2.urlopen(request).read())
-    if (output['id'] != None):
-        return True
-    else:
-        return False
-
-
-def update_tasks(api_url, api_key, csvreader, app='feynmanflowers', ):
-    """
-    Update tasks question
-
-    :arg string app: Application short_name in PyBossa.
-    :returns: True when the template has been updated.
-    :rtype: boolean
-    """
-
-    data_url = 'http://www.ucl.ac.uk/~ucanchi/PyBossa/Data/FePc_Cu001/'
-    request = urllib2.Request('%s/api/app?short_name=%s' %
-                              (api_url, app))
-    request.add_header('Content-type', 'application/json')
-
-    res = urllib2.urlopen(request).read()
-    res = json.loads(res)
-    app = res[0]
-    if app.get('short_name'):
-        request = urllib2.Request('%s/api/task?app_id=%s&limit=%s' %
-                                  (api_url, app['id'], 10000))
-        request.add_header('Content-type', 'application/json')
-
-        res = urllib2.urlopen(request).read()
-        tasks = json.loads(res)
-        tmp = []
-        for row in csvreader:
-            tmp.append(row)
-
-        print "Number of tasks: %s" % len(tasks)
-        for t in tasks:
-            #t['info']['question'] = u'Do you see a human in this photo?'
-            print "Updating Task ID: %s " % t['id']
-
-            for row in tmp:
-                if ( ( ( data_url + row[0] ) == t['info']['url_photo'] ) and \
-                    ( row[1] == t['info']['molecule_label']) ):
-                        t['info']['img_width'] = row[2]
-                        t['info']['img_height'] = row[3]
-                        data = dict(info=t['info'], app_id=t['app_id'])
-                        data = json.dumps(data)
-                        request = urllib2.Request(api_url + '/api/task/' + str(t['id']) + \
-                                                  '?api_key=' + api_key)
-                        request.add_data(data)
-                        request.add_header('Content-type', 'application/json')
-                        request.get_method = lambda: 'PUT'
-
-                        if (urllib2.urlopen(request).getcode() == 200):
-                            print "Task ID: %s  updated" % t['id']
-                            break
-                        else:
-                            break
-    else:
-        return False
-
-
-def get_flickr_photos(size="big"):
-    """
-    Gets public photos from Flickr feeds
-    :arg string size: Size of the image from Flickr feed.
-    :returns: A list of photos.
-    :rtype: list
-    """
-    # Get the ID of the photos and load it in the output var
-    print('Contacting Flickr for photos')
-    url = "http://api.flickr.com/services/feeds/photos_public.gne"
-    values = {
-        'nojsoncallback': 1,
-        'format': "json",
-        #'ids':'25053835@N03'
-        }
-    query = url + "?" + urllib.urlencode(values)
-    urlobj = urllib2.urlopen(query)
-    data = urlobj.read()
-    urlobj.close()
-    # The returned JSON object by Flickr is not correctly escaped,
-    # so we have to fix it see
-    # http://goo.gl/A9VNo
-    regex = re.compile(r'\\(?![/u"])')
-    fixed = regex.sub(r"\\\\", data)
-    output = json.loads(fixed)
-    print('Data retrieved from Flickr')
-
-    # For each photo ID create its direct URL according to its size:
-    # big, medium, small (or thumbnail) + Flickr page hosting the photo
-    photos = []
-    for idx, photo in enumerate(output['items']):
-        print 'Retrieved photo: %s' % idx
-        imgUrl_m = photo["media"]["m"]
-        imgUrl_b = string.replace(photo["media"]["m"], "_m.jpg", "_b.jpg")
-        photos.append({'link': photo["link"], 'url_m':  imgUrl_m,
-                       'url_b': imgUrl_b})
-    return photos
-
+    return info
 
 if __name__ == "__main__":
     # Arguments for the application
     usage = "usage: %prog [options]"
     parser = OptionParser(usage)
     # URL where PyBossa listens
-    parser.add_option("-u", "--url", dest="api_url",
+    parser.add_option("-s", "--server", dest="api_url",
                       help="PyBossa URL http://domain.com/", metavar="URL")
     # API-KEY
     parser.add_option("-k", "--api-key", dest="api_key",
@@ -370,9 +85,9 @@ if __name__ == "__main__":
                      )
 
     # Update tasks question
-    parser.add_option("-q", "--update-tasks", action="store_true",
+    parser.add_option("-q", "--update-tasks",
                       dest="update_tasks",
-                      help="Update Tasks question",
+                      help="Update Tasks n_answers",
                       metavar="UPDATE-TASKS"
                      )
 
@@ -392,21 +107,47 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose")
     (options, args) = parser.parse_args()
 
+    # Load app details
+    try:
+        app_json = open('app.json')
+        app_config = json.load(app_json)
+        app_json.close()
+    except IOError as e:
+        print "app.json is missing! Please create a new one"
+        exit(0)
+
     if not options.api_url:
         options.api_url = 'http://localhost:5000/'
+    pbclient.set('endpoint', options.api_url)
 
     if not options.api_key:
         parser.error("You must supply an API-KEY to create an \
                       applicationa and tasks in PyBossa")
+    else:
+        pbclient.set('api_key', options.api_key)
+
+    if not options.n_answers:
+        options.n_answers = 30
 
     if (options.verbose):
         print('Running against PyBosssa instance at: %s' % options.api_url)
         print('Using API-KEY: %s' % options.api_key)
 
     if options.create_app:
-        app_id = create_app(options.api_url, options.api_key)
+        pbclient.create_app(app_config['name'],
+                app_config['short_name'],
+                app_config['description'])
+        app = pbclient.find_app(short_name=app_config['short_name'])[0]
+        app.long_description = open('long_description.html').read()
+        app.info['task_presenter'] = open('template.html').read()
+        app.info['thumbnail'] = app_config['thumbnail']
+        app.info['tutorial'] = open('tutorial.html').read()
+
+        pbclient.update_app(app)
+        # Open the CSV file with the tasks
         import csv 
-        with open('BoundingBoxData.csv', 'rb') as csvfile:
+        #with open('BoundingBoxData.csv', 'rb') as csvfile:
+        with open('ImageData.csv', 'rb') as csvfile:
             csvreader = csv.reader(csvfile, delimiter=',')
             # Each row has the following format
             # Filename,
@@ -421,41 +162,43 @@ if __name__ == "__main__":
             # Bounding Box Y2,
             # The width and height is the same for the second box
             for row in csvreader:
-               if options.n_answers:
-                   create_task(options.api_url, options.api_key, app_id,
-                               options.n_answers, row)
-               else:
-                   create_task(options.api_url, options.api_key, app_id,
-                               30, row)
+                task_info = task_formatter(app_config, row, options.n_answers)
+                pbclient.create_task(app.id, task_info)
     else:
         if options.add_more_tasks:
-            request = urllib2.Request('%s/api/app?short_name=%s' %
-                                      (options.api_url, 'feynmanflowers'))
-            request.add_header('Content-type', 'application/json')
-
-            app = urllib2.urlopen(request).read()
-            app = json.loads(app)
-            app = app[0]
-            photos = get_flickr_photos()
-            for photo in photos:
-                if options.n_answers:
-                    create_task(options.api_url, options.api_key, app['id'],
-                                options.n_answers, photo)
-                else:
-                    create_task(options.api_url, options.api_key, app['id'],
-                                30, photo)
+            for row in csvreader:
+                task_info = task_formatter(app_config, row, options.n_answers)
+                pbclient.create_task(app.id, task_info)
 
     if options.update_template:
         print "Updating app template"
-        update_template(options.api_url, options.api_key)
+        app = pbclient.find_app(short_name=app_config['short_name'])[0]
+        app.long_description = open('long_description.html').read()
+        app.info['task_presenter'] = open('template.html').read()
+        app.info['tutorial'] = open('tutorial.html').read()
+        pbclient.update_app(app)
 
     if options.update_tasks:
-        print "Updating task question"
-        import csv 
-        with open('BoundingBoxData.csv', 'rb') as csvfile:
-            csvreader = csv.reader(csvfile, delimiter=',')
-            update_tasks(options.api_url, options.api_key, csvreader)
+        print "Updating task n_answers"
+        app = pbclient.find_app(short_name=app_config['short_name'])[0]
+        app = pbclient.find_app(short_name=app_config['short_name'])[0]
+        n_tasks = 0
+        offset = 0
+        limit = 100
+        tasks = pbclient.get_tasks(app.id,offset=offset,limit=limit)
+        while tasks:
+            for task in tasks:
+                print "Updating task: %s" % task.id
+                if ('n_answers' in task.info.keys()):
+                    del(task.info['n_answers'])
+                task.n_answers = int(options.update_tasks)
+                pbclient.update_task(task)
+                n_tasks += 1
+            offset = (offset + limit)
+            tasks = pbclient.get_tasks(app.id,offset=offset,limit=limit)
+        print "%s Tasks have been updated!" % n_tasks
+
 
     if not options.create_app and not options.update_template\
-            and not options.add_more_tasks:
+            and not options.add_more_tasks and not options.update_tasks:
         parser.error("Please check --help or -h for the available options")
