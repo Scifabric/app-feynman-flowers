@@ -181,7 +181,6 @@ if __name__ == "__main__":
     if options.update_tasks:
         print "Updating task n_answers"
         app = pbclient.find_app(short_name=app_config['short_name'])[0]
-        app = pbclient.find_app(short_name=app_config['short_name'])[0]
         n_tasks = 0
         offset = 0
         limit = 100
