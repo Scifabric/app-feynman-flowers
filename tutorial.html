@@ -165,10 +165,10 @@
         <div class="span2">
           <strong>Angle </strong> <span class="badge badge-info" id="rotation">0º</span>
         </div>
-        <div class="span2">
+        <div id="rotation-btn" class="span2 pull-right">
           <div class="btn-group">
             <button class="btn" onclick="increaseDegrees()"><i class="icon icon-white icon-plus"></i></button>
-            <button id="rotation-btn" class="btn" onclick="decreaseDegrees()"><i class="icon icon-white icon-minus"></i></button>
+            <button class="btn" onclick="decreaseDegrees()"><i class="icon icon-white icon-minus"></i></button>
           </div>
         </div>
       </div>
@@ -236,12 +236,14 @@ function show(method){
             'content': "Hover your mouse over the photo in order to place the marker in the center of the molecule and <strong>click</strong> to mark the center.",
             'placement': 'left',
             'trigger': 'manual',
+            'html': true,
         });
         $("#btn" + pop).popover({
             'title': "<strong>Save your answer<strong>",
             'content': "This button will submit this photo as the <i>clearest</i> one, and load a new set of photos for you. Click on it to finish the tutorial!",
             'placement': 'bottom',
             'trigger': 'manual',
+            'html': true,
         });
 
         var diameter = Math.floor((218*90)/100);
@@ -275,6 +277,7 @@ $("#submit-btn").popover({
     'content': 'Congratulations!! You have now completed one molecule. Click in this button to submit the results and load a new one.',
     'placement': 'bottom',
     'trigger': 'manual',
+    'html': true,
 });
 
 function finish() {
@@ -300,9 +303,10 @@ function increaseDegrees() {
         $("#rotation-btn").popover("destroy");
         $("#rotation-btn").popover({
             'title': "<strong>Rotating the axes clock-wise<strong>",
-            'content': 'Great! You have rotated the axes clock-wise!!!',
-            'placement': 'right',
+            'content': "Great! You have rotated the axes clock-wise!!!",
+            'placement': 'left',
             'trigger': 'manual',
+            'html': true,
         });
 
         $("#rotation-btn").popover("show");
@@ -315,6 +319,7 @@ function increaseDegrees() {
             'content': "Sometimes after aligining the axes, you will need to re-adjust the center. If you need it, just click again in the image to start moving the crosshair again, and click a final time to mark the position.",
             'placement': 'left',
             'trigger': 'manual',
+            'html': true,
         });
 
         $("#photo").popover("show");
@@ -337,6 +342,7 @@ function decreaseDegrees() {
             'content': 'Great! You have rotated the axes anti clock-wise!!!',
             'placement': 'right',
             'trigger': 'manual',
+            'html': true,
         });
 
         $("#rotation-btn").popover("show");
@@ -350,6 +356,7 @@ function decreaseDegrees() {
             'content': "Sometimes after aligining the axes, you will need to re-adjust the center. If you need it, just click again in the image to start moving the crosshair again, and click a final time to mark the position.",
             'placement': 'left',
             'trigger': 'manual',
+            'html': true,
         });
 
         $("#photo").popover("show");
@@ -449,6 +456,7 @@ function initializeCrosshair(div,posX, posY, size, diameter){
                 'content': "After marking the center, you can move the mouse to align the blue crosshair with the molecule axes. Then, <strong>click</strong> again to pause the rotation.",
                 'placement': 'left',
                 'trigger': 'manual',
+                'html': true,
             });
 
             $("#photo").popover("show");
@@ -458,9 +466,10 @@ function initializeCrosshair(div,posX, posY, size, diameter){
             $("#photo").popover("destroy");
             $("#rotation-btn").popover({
                 'title': "<strong>Tip<strong>",
-                'content': 'You can adjust the angle with the <i class="icon-plus"></i> and <i class="icon-minus"></i> buttons. Try it!',
-                'placement': 'right',
+                'content': "You can adjust the angle with the <i class='icon-plus'></i> and <i class='icon-minus'></i> buttons. Try it!",
+                'placement': 'left',
                 'trigger': 'manual',
+                'html': true,
             });
 
             $("#rotation-btn").popover("show");
