@@ -174,18 +174,22 @@ if __name__ == "__main__":
             # Bounding Box Y2,
             # The width and height is the same for the second box
             for row in csvreader:
-                task_info = task_formatter(app_config, row, options.n_answers,
-                                           options.data_url)
-                pbclient.create_task(app.id, task_info)
+                print row[0]
+                if row[0] != 'Filename' and row[0] != '':
+                    task_info = task_formatter(app_config, row, options.n_answers,
+                                               options.data_url)
+                    pbclient.create_task(app.id, task_info)
     else:
         if options.add_more_tasks:
             app = pbclient.find_app(short_name=app_config['short_name'])[0]
             with open(options.molecule_csv, 'rb') as csvfile:
                 csvreader = csv.reader(csvfile, delimiter=',')
                 for row in csvreader:
-                    task_info = task_formatter(app_config, row, options.n_answers,
-                                               options.data_url)
-                    pbclient.create_task(app.id, task_info)
+                    if row[0] != 'Filename' and row[0] != '':
+                        task_info = task_formatter(app_config, row,
+                                                   options.n_answers,
+                                                   options.data_url)
+                        pbclient.create_task(app.id, task_info)
 
     if options.update_template:
         print "Updating app template"
