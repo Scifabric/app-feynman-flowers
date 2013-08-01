@@ -15,6 +15,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with PyBOSSA.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright 2013 Citizen Cyberscience Centre
 
 import json
 from optparse import OptionParser
