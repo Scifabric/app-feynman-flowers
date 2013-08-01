@@ -16,11 +16,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with PyBOSSA.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib
-import urllib2
 import json
-import re
-import string
 from optparse import OptionParser
 import pbclient
 
@@ -56,9 +52,8 @@ def task_formatter(app_config, row, n_answers, data_url):
                 molecule_label=row[1],
                 #img_width=row[2],
                 #img_height=row[3],
-                bbox=[dict(x=row[4],y=row[5],width=width,height=height),
-                      dict(x=row[8],y=row[9],width=width,height=height),
-                    ])
+                bbox=[dict(x=row[4], y=row[5], width=width, height=height),
+                      dict(x=row[8], y=row[9], width=width, height=height)])
     return info
 
 if __name__ == "__main__":
@@ -81,36 +76,31 @@ if __name__ == "__main__":
     parser.add_option("-t", "--update-template", action="store_true",
                       dest="update_template",
                       help="Update Tasks template",
-                      metavar="UPDATE-TEMPLATE"
-                     )
+                      metavar="UPDATE-TEMPLATE")
 
     # Update tasks question
     parser.add_option("-q", "--update-tasks",
                       dest="update_tasks",
                       help="Update Tasks n_answers",
-                      metavar="UPDATE-TASKS"
-                     )
+                      metavar="UPDATE-TASKS")
 
     parser.add_option("-x", "--extra-task", action="store_true",
                       dest="add_more_tasks",
                       help="Add more tasks",
-                      metavar="ADD-MORE-TASKS"
-                      )
+                      metavar="ADD-MORE-TASKS")
+
     # Modify the number of TaskRuns per Task
     # (default 30)
     parser.add_option("-n", "--number-answers",
                       dest="n_answers",
                       help="Number of answers per task",
-                      metavar="N-ANSWERS"
-                     )
+                      metavar="N-ANSWERS")
 
     # Add data_url for the Images
     parser.add_option("-d", "--data-url",
                       dest="data_url",
                       help="Data URL hosting the molecule pictures",
-                      metavar="DATA-URL"
-                     )
-
+                      metavar="DATA-URL")
 
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose")
     (options, args) = parser.parse_args()
@@ -146,8 +136,8 @@ if __name__ == "__main__":
 
     if options.create_app:
         pbclient.create_app(app_config['name'],
-                app_config['short_name'],
-                app_config['description'])
+                            app_config['short_name'],
+                            app_config['description'])
         app = pbclient.find_app(short_name=app_config['short_name'])[0]
         app.long_description = open('long_description.html').read()
         app.info['task_presenter'] = open('template.html').read()
@@ -196,7 +186,7 @@ if __name__ == "__main__":
         n_tasks = 0
         offset = 0
         limit = 100
-        tasks = pbclient.get_tasks(app.id,offset=offset,limit=limit)
+        tasks = pbclient.get_tasks(app.id, offset=offset, limit=limit)
         while tasks:
             for task in tasks:
                 print "Updating task: %s" % task.id
@@ -206,9 +196,8 @@ if __name__ == "__main__":
                 pbclient.update_task(task)
                 n_tasks += 1
             offset = (offset + limit)
-            tasks = pbclient.get_tasks(app.id,offset=offset,limit=limit)
+            tasks = pbclient.get_tasks(app.id, offset=offset, limit=limit)
         print "%s Tasks have been updated!" % n_tasks
-
 
     if not options.create_app and not options.update_template\
             and not options.add_more_tasks and not options.update_tasks:
