@@ -25,9 +25,9 @@ from optparse import OptionParser
 import pbclient
 
 
-def task_formatter(app_config, row, n_answers):
+def task_formatter(app_config, row, n_answers, data_url):
     """
-    Format a task 
+    Format a task
 
     :arg integer app_id: Application ID in PyBossa.
     :returns: PyBossa Task INFO object
@@ -104,6 +104,14 @@ if __name__ == "__main__":
                       metavar="N-ANSWERS"
                      )
 
+    # Add data_url for the Images
+    parser.add_option("-d", "--data-url",
+                      dest="data_url",
+                      help="Data URL hosting the molecule pictures",
+                      metavar="DATA-URL"
+                     )
+
+
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose")
     (options, args) = parser.parse_args()
 
@@ -126,6 +134,9 @@ if __name__ == "__main__":
     else:
         pbclient.set('api_key', options.api_key)
 
+    if not options.data_url:
+        parser.error("You must supply the HTTP URL that hosts the molecule pictures")
+
     if not options.n_answers:
         options.n_answers = 30
 
@@ -145,7 +156,7 @@ if __name__ == "__main__":
 
         pbclient.update_app(app)
         # Open the CSV file with the tasks
-        import csv 
+        import csv
         #with open('BoundingBoxData.csv', 'rb') as csvfile:
         with open('ImageData.csv', 'rb') as csvfile:
             csvreader = csv.reader(csvfile, delimiter=',')
@@ -162,7 +173,8 @@ if __name__ == "__main__":
             # Bounding Box Y2,
             # The width and height is the same for the second box
             for row in csvreader:
-                task_info = task_formatter(app_config, row, options.n_answers)
+                task_info = task_formatter(app_config, row, options.n_answers,
+                                           options.data_url)
                 pbclient.create_task(app.id, task_info)
     else:
         if options.add_more_tasks:
