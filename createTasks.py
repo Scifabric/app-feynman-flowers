@@ -19,6 +19,7 @@
 # Copyright 2013 Citizen Cyberscience Centre
 
 import json
+import csv
 from optparse import OptionParser
 import pbclient
 
@@ -45,7 +46,7 @@ def task_formatter(app_config, row, n_answers, data_url):
 
     # Data for the tasks
     #data_url = 'http://www.ucl.ac.uk/~ucanchi/PyBossa/Data/FePc_Cu001/'
-    data_url = 'http://www.ucl.ac.uk/~ucanchi/PyBossa/Data/DyPc2_Cu/'
+    # data_url = 'http://www.ucl.ac.uk/~ucanchi/PyBossa/Data/DyPc2_Cu/'
     width = row[6]
     height = row[7]
     info = dict(question=app_config['question'],
@@ -104,6 +105,12 @@ if __name__ == "__main__":
                       help="Data URL hosting the molecule pictures",
                       metavar="DATA-URL")
 
+    # CSV file with the molecules information
+    parser.add_option("-m", "--molecule-csv",
+                      dest="molecule_csv",
+                      help="CSV file name with the molecules data",
+                      metavar="MOLECULE-CSV")
+
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose")
     (options, args) = parser.parse_args()
 
@@ -129,6 +136,10 @@ if __name__ == "__main__":
     if not options.data_url:
         parser.error("You must supply the HTTP URL that hosts the molecule pictures")
 
+    if not options.molecule_csv:
+        parser.error("You must supply the CSV file name with the molecule \
+                     information")
+
     if not options.n_answers:
         options.n_answers = 30
 
@@ -148,9 +159,7 @@ if __name__ == "__main__":
 
         pbclient.update_app(app)
         # Open the CSV file with the tasks
-        import csv
-        #with open('BoundingBoxData.csv', 'rb') as csvfile:
-        with open('ImageData.csv', 'rb') as csvfile:
+        with open(options.molecule_csv, 'rb') as csvfile:
             csvreader = csv.reader(csvfile, delimiter=',')
             # Each row has the following format
             # Filename,
@@ -170,9 +179,13 @@ if __name__ == "__main__":
                 pbclient.create_task(app.id, task_info)
     else:
         if options.add_more_tasks:
-            for row in csvreader:
-                task_info = task_formatter(app_config, row, options.n_answers)
-                pbclient.create_task(app.id, task_info)
+            app = pbclient.find_app(short_name=app_config['short_name'])[0]
+            with open(options.molecule_csv, 'rb') as csvfile:
+                csvreader = csv.reader(csvfile, delimiter=',')
+                for row in csvreader:
+                    task_info = task_formatter(app_config, row, options.n_answers,
+                                               options.data_url)
+                    pbclient.create_task(app.id, task_info)
 
     if options.update_template:
         print "Updating app template"
