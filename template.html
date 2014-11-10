@@ -5,7 +5,6 @@
 
     #layer1 {
         z-index: 1;
-        border: 1px solid rgb(0, 0, 0.1);
         box-shadow: 0 0 5px #888;
         background-color: black;
 
@@ -50,7 +49,7 @@
 
 <div class="row">
     <!-- Success and Error Messages for the user --> 
-    <div class="span8 offset2" style="height:50px">
+    <div class="col-md-8 offset2" style="height:50px">
         <!-- Success alert box -->
         <div id="success" class="alert alert-success" style="display:none;">
             <a class="close">×</a><strong>Well done!</strong> Your answer has been saved
@@ -85,43 +84,48 @@
 <a c    lass="btn small" href="/app">Please, try with another application</a>
             </div>
         </div>
-    </div><!-- End of span8 offset2-->
+    </div><!-- End of col-md-8 offset2-->
 </div><!-- End of Row-->
 
 <!-- UI for the task -->
 <div class="row skeleton">
-  <div id="question" class="span5 well">
+  <div id="question" class="col-md-5 well">
       <h2>Question</h2>
       <p>You are working now on task: <span id="task-id" class="label label-warning">#</span></p>
       <p>You have completed: <span id="done" class="label label-info"></span> tasks from
-      <span id="total" class="label label-inverse"></span></p>
+      <span id="total" class="label label-info"></span></p>
       <div class="progress progress-striped">
-          <div id="progress" rel="tooltip" title="#" class="bar" style="width: 0%;"></div>
+          <div id="progress" rel="tooltip" title="#" class="progress-bar"
+              role="progressbar" style="width: 0%;"></div>
       </div>
-      <p><span class="label label-warning"><i class="icon-bullhorn"></i> Tip</span> If you need help, check the <a class="btn btn-primary" href="../tutorial">Tutorial</a></p>
+      <p><span class="label label-warning"><i class="icon-bullhorn"></i>
+          Tip</span> If you need help, check the <a class="btn btn-default btn-sm" href="../tutorial">Tutorial</a></p>
       <p id="img_size_p">Image size: 
-        <span id="img_size" class="label label-inverse">Size: </span>
+        <span id="img_size" class="label label-info">Size: </span>
       </p>
       <p>Molecule <strong>X</strong> and <strong>Y</strong> coordinates: <span id="molecule-x" class="label label-info">0</span> <span id="molecule-y" class="label label-info">0</span></p>
       <div id="rotation-box" class="row" style="display:none">
         <hr>
-        <div class="span2">
-          <strong>Angle </strong> <span class="badge badge-info" id="rotation">0º</span>
+        <div class="col-md-6">
+            <h3>
+            <strong>Angle </strong> <span id="rotation">0º</span>
+            </h3>
         </div>
-        <div class="span2">
-          <div class="btn-group">
-            <button id="increaseDegreesBtn" class="btn"><i class="icon icon-white icon-plus"></i></button>
-            <button id="decreaseDegreesBtn" rel="tooltip" title="Use these buttons to adjust the degrees" class="btn"><i class="icon icon-white icon-minus"></i></button>
+        <div class="col-md-6">
+          <div class="btn-group btn-group-sm">
+            <button id="increaseDegreesBtn" class="btn btn-primary">+</button>
+            <button id="decreaseDegreesBtn" rel="tooltip" title="Use these
+                buttons to adjust the degrees" class="btn btn-primary">-</button>
           </div>
         </div>
       </div>
       <!-- Answer buttons -->
-      <div id="answer" class="span5" style="display:none; padding-top:10px;text-align:center;">
+      <div id="answer" class="col-md-5" style="display:none; padding-top:10px;text-align:center;">
           <hr>
           <button class="btn btn-large btn-success btn-submit"><i class="icon icon-white icon-ok"></i> Save the coordinates and the angle</button>
       </div>
   </div>
-  <div id="layer0" class="span6">
+  <div id="layer0" class="col-md-6">
       <div id="layer1" style="width:512px;height:512px;">
         <a id="photo-link" href="#">
             <img id="photo" src="http://img339.imageshack.us/img339/9017/loadingo.png" onload='$("#loadingTask").hide()' style="max-width=100%">
@@ -152,7 +156,7 @@
 <script>
 //    if (Modernizr.svg) {
 //});
-var appname = 'feynmanflowers';
+var appname = '2feynmanflowers';
 
 //var degrees = 0;
 //var rect;
@@ -189,7 +193,7 @@ function initializeCrosshair(task, div,posX, posY, size, diameter){
     halfSize = diameter/2;
     var radius = diameter/2;
     var x = size/2;
-    var y= size/2;
+    var y = size/2;
     var diameter = radius + halfSize;
 
     task.set.push(
@@ -271,7 +275,7 @@ function initializeCrosshair(task, div,posX, posY, size, diameter){
 
 
 function loadUserProgress() {
-    pybossa.userProgress('feynmanflowers').done(function(data){
+    pybossa.userProgress(appname).done(function(data){
         var pct = Math.round((data.done*100)/data.total);
         $("#progress").css("width", pct.toString() +"%");
         $("#progress").attr("title", pct.toString() + "% completed!");

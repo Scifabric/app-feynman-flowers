@@ -1,16 +1,6 @@
 <! -- Fix for Bootstrap css with Google Maps https://github.com/twitter/bootstrap/issues/1552 -->
+<script src="http://crowdcrafting.org/static/js/raphael-min.js"></script>
 <style type="text/css">
-#throbber {
-    padding: 10px;
-    position:absolute;
-    left: 45%;
-    top:45%;
-    margin: -50px 0 0 -50px;
-    z-index: 10000;
-    width: 100px;
-    height: 100px;
-}
-
 #layer0 {
     position: relative
 }
@@ -59,9 +49,30 @@
 </style>
 
 <div class="row">
+    <div class="col-md-12">
+        <div id="end" class="modal fade" style="margin-top:15%">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Now start contributing!</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Congratulations!!!</strong> You have finished the tutorial.</p>
+                        <p>Now you can start participating in the real project!</p>
+                        <div style="text-align:center;">
+                        <a href="../2feynmanflowers/newtask" class="btn btn-large btn-primary"><i class="icon-thumbs-up"></i> Start contributing!</a>
+                    </div>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+    </div>
+</div>
+
+<div class="row">
   <!-- Success and Error Messages for the user --> 
   <!-- Question, task id, photo and action buttons for answering the question-->
-  <div class="span12" style="height:50px;">
+  <div class="col-md-12" style="height:50px;">
     <div id="success" class="alert alert-success" style="display:none;">
       <a class="close">×</a>
       <strong>Well done!</strong> Your answer has been saved</strong>
@@ -96,65 +107,55 @@
 </div>
 
 <!-- tutorials -->
-<div id="welcome" class="modal hide fade" style="display: none;">
-    <div class="modal-header">
-        <h3>Welcome to Feynman's Flowers tutorial</h3>
-    </div>
-    <div class="modal-body">
-        <div id="0">
-            <p>Feynman's flowers application will show you a photo from a molecule
-            and we will need your help to find out the coordinates of the center of the molecule,
-            as well as the angle that its axes have.</p> 
+<div class="row">
+    <div class="col-md-12">
+        <div id="modal" class="modal hide fade" style="margin-top:5%;">
+            <div class="modal-header">
+                <h3>Welcome to Feynman's Flowers tutorial</h3>
+            </div>
+            <div id="0" class="modal-body">
+                <p>Feynman's flowers application will show you a photo from a molecule
+                and we will need your help to find out the coordinates of the center of the molecule,
+                as well as the angle that its axes have.</p> 
+            </div>
+            <div id="1" class="modal-body" style="display:none;">
+                <p>The application will mark the target molecule with a blue rectangle like this:</p>
+                <img class="tutorial" src="http://imageshack.us/a/img41/8239/fg4l.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
+        
+            </div>
+            <div id="2" class="modal-body" style="display:none;">
+                <p>In order to mark the center of the molecule, hover your mouse over the molecule
+                and a blue cross hair will appear:</p>
+                <img class="tutorial" src="http://imageshack.us/a/img513/4876/fg5.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
+                <p>The coordinates will be updated as you move the mouse. Click to mark the final position and the cross hair will stop moving.</p>
+                <p><span class="label label-info"><i class="icon-bullhorn"></i> Tip</span> You can update the coordinates of the center of the molecule by clicking again in the image.</p>
+            </div>
+            <div id="3" class="modal-body" style="display:none;">
+                <p>Sometimes the molecules will be smaller, so it will be a bit more challenging. Check these two examples:</p>
+                <img class="tutorial" src="http://imageshack.us/a/img211/1674/fg1e.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
+                <img class="tutorial" src="http://imageshack.us/a/img41/8239/fg4l.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
+            </div>
+            <div id="4" class="modal-body" style="display:none;">
+                <p>Once you have marked the center of the molecule, you will have to rotate it, just move the mouse, to match the four axes of the molecule:</p>
+                <img src="http://imageshack.us/a/img854/3325/fg6j.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
+            </div>
+            <div id="5" class="modal-body" style="display:none;">
+                <p>Now it's your turn to try!</p>
+            </div>
+            <div class="modal-footer">
+                <button id="prev" class="btn" onclick="show('p')" style="display:none"><i class="icon-chevron-left"></i> Previous</button>
+                <button id="next" class="btn btn-success" onclick="show('n')">Next <i class="icon-chevron-right"></i> </button>
+            </div>
         </div>
-        <div id="1" style="display:none;">
-            <p>The application will mark the target molecule with a blue rectangle like this:</p>
-            <img class="tutorial" src="http://imageshack.us/a/img41/8239/fg4l.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
-
-        </div>
-        <div id="2" style="display:none;">
-            <p>In order to mark the center of the molecule, hover your mouse over the molecule
-            and a blue cross hair will appear:</p>
-            <img class="tutorial" src="http://imageshack.us/a/img513/4876/fg5.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
-            <p>The coordinates will be updated as you move the mouse. Click to mark the final position and the cross hair will stop moving.</p>
-            <p><span class="label label-info"><i class="icon-bullhorn"></i> Tip</span> You can update the coordinates of the center of the molecule by clicking again in the image.</p>
-        </div>
-        <div id="3" style="display:none;">
-            <p>Sometimes the molecules will be smaller, so it will be a bit more challenging. Check these two examples:</p>
-            <img class="tutorial" src="http://imageshack.us/a/img211/1674/fg1e.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
-            <img class="tutorial" src="http://imageshack.us/a/img41/8239/fg4l.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
-        </div>
-        <div id="4" style="display:none;">
-            <p>Once you have marked the center of the molecule, you will have to rotate it, just move the mouse, to match the four axes of the molecule:</p>
-            <img src="http://imageshack.us/a/img854/3325/fg6j.png" style="padding:5px; border: 1px solid rgb(0, 0, 0.1); box-shadow: 0 0 5px #888;">
-        </div>
-        <div id="5" style="display:none;">
-            <p>Now it's your turn to try!</p>
-        </div>
-    </div>
-
-    <div class="modal-footer">
-        <button id="prev" class="btn" onclick="show('p')" style="display:none"><i class="icon-chevron-left"></i> Previous</button>
-        <button id="next" class="btn btn-success" onclick="show('n')">Next <i class="icon-chevron-right"></i> </button>
-    </div>
-</div>
-
-<div id="end" class="modal hide fade" style="display: none;">
-    <div class="modal-header">
-        <h3>Now start contributing!</h3>
-    </div>
-    <div class="modal-body">
-        <p><strong>Congratulations!!!</strong> You have finished the tutorial.</p>
-        <p>Now you can start participating in the real project!</p>
-        <a href="./newtask" class="btn btn-large btn-primary"><i class="icon-thumbs-up"></i> Start contributing!</a>
     </div>
 </div>
 
 <div class="row skeleton">
-  <div id="question" class="span5 well">
+  <div id="question" class="col-md-5 well">
       <h2>Question</h2>
       <p>You are working now on task: <span id="task-id" class="label label-warning">#</span></p>
       <p>You have completed: <span id="done" class="label label-info"></span> tasks from
-      <span id="total" class="label label-inverse"></span></p>
+      <span id="total" class="label label-info"></span></p>
       <div class="progress progress-striped">
           <div id="progress" rel="tooltip" title="#" class="bar" style="width: 0%;"></div>
       </div>
@@ -162,24 +163,23 @@
       <p>Molecule <strong>X</strong> and <strong>Y</strong> coordinates: <span id="molecule-x" class="label label-info">0</span> <span id="molecule-y" class="label label-info">0</span></p>
       <div id="rotation-box" class="row" style="display:none">
         <hr>
-        <div class="span2">
-          <strong>Angle </strong> <span class="badge badge-info" id="rotation">0º</span>
+        <div class="col-md-6">
+            <p><strong>Angle: </strong> <span id="rotation">0º</span></p>
         </div>
-        <div id="rotation-btn" class="span2 pull-right">
-          <div class="btn-group">
-            <button class="btn" onclick="increaseDegrees()"><i class="icon icon-white icon-plus"></i></button>
-            <button class="btn" onclick="decreaseDegrees()"><i class="icon icon-white icon-minus"></i></button>
+        <div id="rotation-btn" class="col-md-6">
+          <div class="btn-group pull-right" style="z-index: 0 !important;">
+            <button class="btn btn-default" onclick="increaseDegrees()">+</button>
+            <button class="btn btn-default" onclick="decreaseDegrees()">-</button>
           </div>
         </div>
       </div>
       <!-- Answer buttons -->
-      <div id="answer" class="span5" style="display:none; padding-top:10px;text-align:center;">
+      <div id="answer" class="col-md-5" style="display:none; padding-top:10px;text-align:center;">
           <hr>
-          <button id="submit-btn" class="btn btn-large btn-success" onclick="finish()"><i class="icon icon-white icon-ok"></i> Save the coordinates and the angle</button>
+          <button id="submit-btn" class="btn btn-large btn-success" onclick="finish()">Save the coordinates and the angle</button>
       </div>
-
   </div>
-  <div id="layer0" class="span6">
+  <div id="layer0" class="col-md-6">
       <div id="layer1" style="width:512px;height:512px;">
             <img id="photo" src="http://img339.imageshack.us/img339/9017/loadingo.png" style="max-width=100%">
       </div>
@@ -230,7 +230,7 @@ function show(method){
         $("#" + tut).show();
     }
     else {
-        $("#welcome").modal("hide");
+        $("#modal").modal("hide");
         $("#layer0").popover({
             'title': "<strong>Marking the center of the molecule<strong>",
             'content': "Hover your mouse over the photo in order to place the marker in the center of the molecule and <strong>click</strong> to mark the center.",
@@ -270,7 +270,7 @@ function showPop(tut,pop) {
     $("#" + pop).popover("show");
 }
 // Start with tutorials, the rest will load in the background
-$("#welcome").modal("show");
+$("#modal").modal("show");
 
 $("#submit-btn").popover({
     'title': "<strong>Submitting the results<strong>",
@@ -304,7 +304,7 @@ function increaseDegrees() {
         $("#rotation-btn").popover({
             'title': "<strong>Rotating the axes clock-wise<strong>",
             'content': "Great! You have rotated the axes clock-wise!!!",
-            'placement': 'left',
+            'placement': 'right',
             'trigger': 'manual',
             'html': true,
         });
